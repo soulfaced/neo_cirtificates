@@ -1,0 +1,102 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- <link rel="stylesheet" href="./index.css"> -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+  <title>Generate Certificate</title>
+</head>
+<body class="bg-black h-screen flex flex-col items-center justify-center">
+    <img src="./NEO'24-WHITE.png" alt="logo">
+    <h1 class="text-white text-3xl font-bold uppercase">Neo Round 1 Certificate </h1>
+  <div class="bg-black h-screen p-8 rounded-md shadow-md">
+    <label for="certificateName" class="text-lg text-white font-semibold mb-2">Enter Name:</label>
+    <input type="text" id="certificateName" placeholder="Type your name" class="w-full border rounded-md py-2 px-3 mb-4">
+
+    <button onclick="generateCertificate()" class="bg-blue-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-blue-600">Generate Certificate</button>
+  </div>
+  <script type="module">
+
+    data = {
+    "preetimeshram9822@gmail.com": "Ahaana Nitin Meshram",
+    "gshilpa267@gmail.com": "Aksh Gupta",
+    "ksinghmanoj97@gmail.com": "Akshansh Singh",
+    "reemaprasad001@gmail.com": "Akshat Anand",
+    "ajain.ngp@gmail.com": "Akshat",}
+    import { degrees, PDFDocument, rgb, StandardFonts } from 'https://cdn.skypack.dev/pdf-lib';
+
+    // Define the function globally
+    window.generateCertificate = async function () {
+      const certificateName = document.getElementById('certificateName').value;
+
+      if (!certificateName) {
+        alert('Please enter a name before generating the certificate.');
+        return;
+      }
+
+      // This should be a Uint8Array or ArrayBuffer
+      // This data can be obtained in a number of different ways
+      // If you're running in a Node environment, you could use fs.readFile()
+      // In the browser, you could make a fetch() call and use res.arrayBuffer()
+
+      // Example: Load existing PDF bytes
+      const existingPdfBytes = await fetch('template.pdf').then(response => response.arrayBuffer());
+
+      // Load a PDFDocument from the existing PDF bytes
+      const pdfDoc = await PDFDocument.load(existingPdfBytes);
+
+      // Embed the Helvetica font
+      const helveticaFont = await pdfDoc.embedFont(StandardFonts.HelveticaOblique);
+
+      // Get the first page of the document
+      const pages = pdfDoc.getPages();
+      const firstPage = pages[0];
+
+      // Get the width and height of the first page
+      const { width, height } = firstPage.getSize();
+
+      // Draw a transparent box with a border
+      const boxWidth = 400;
+      const boxHeight = 100;
+      const boxX = (width - boxWidth) / 2;
+      const boxY = (height - boxHeight) / 2-150;
+      // firstPage.drawRectangle({
+      //   x: boxX,
+      //   y: boxY,
+      //   width: boxWidth,
+      //   height: boxHeight,
+      //   // color: rgb(1, 1, 1, 0), // Transparent color
+      //   borderColor: rgb(0, 0, 0), // Black border color
+      //   borderWidth: 2, // Border width
+      // });
+
+      // Draw the name perfectly centered within the box
+      const nameWidth = helveticaFont.widthOfTextAtSize(certificateName, 20);
+      const nameHeight = helveticaFont.heightAtSize(20);
+      firstPage.drawText(certificateName, {
+        x: boxX + (boxWidth - nameWidth) / 2-50,
+        y: boxY + (boxHeight - nameHeight) / 2 + nameHeight,
+        size: 36,
+        font: helveticaFont,
+        color: rgb(0, 0, 0),
+      });
+
+      // Serialize the PDFDocument to bytes (a Uint8Array)
+      const pdfBytes = await pdfDoc.save();
+
+      // Create a blob from the PDF bytes
+      const pdfBlob = new Blob([pdfBytes], { type: 'application/pdf' });
+
+      // Create a download link and trigger a download
+      const downloadLink = document.createElement('a');
+      downloadLink.href = URL.createObjectURL(pdfBlob);
+      downloadLink.download = 'certificate.pdf';
+      downloadLink.click();
+    }
+  </script>
+</body>
+</html>
+
